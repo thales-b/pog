@@ -9,7 +9,7 @@ import (
 )
 
 type Counter struct {
-	input  io.Reader
+	inputs []io.Reader
 	output io.Writer
 }
 
@@ -17,7 +17,7 @@ type option func(*Counter) error
 
 func NewCounter(opts ...option) (*Counter, error) {
 	c := &Counter{
-		input:  os.Stdin,
+		inputs: []io.Reader{os.Stdin},
 		output: os.Stdout,
 	}
 	for _, opt := range opts {
@@ -31,9 +31,11 @@ func NewCounter(opts ...option) (*Counter, error) {
 
 func (c Counter) Lines() int {
 	var result int
-	input := bufio.NewScanner(c.input)
-	for input.Scan() {
-		result++
+	for _, input := range c.inputs {
+		scanner := bufio.NewScanner(input)
+		for scanner.Scan() {
+			result++
+		}
 	}
 	return result
 }
@@ -43,7 +45,7 @@ func WithInput(input io.Reader) option {
 		if input == nil {
 			return errors.New("nil input reader")
 		}
-		c.input = input
+		c.inputs = append(c.inputs, input)
 		return nil
 	}
 }
@@ -53,11 +55,13 @@ func WithInputFromArgs(args []string) option {
 		if len(args) < 1 {
 			return nil
 		}
-		f, err := os.Open(args[0])
-		if err != nil {
-			return err
+		for _, arg := range args {
+			f, err := os.Open(arg)
+			if err != nil {
+				return err
+			}
+			c.inputs = append(c.inputs, f)
 		}
-		c.input = f
 		return nil
 	}
 }

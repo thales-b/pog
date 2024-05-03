@@ -56,6 +56,22 @@ func TestWithInputFromArgs_IgnoresEmptyArgs(t *testing.T) {
 	}
 }
 
+func TestWithInputFromArgs_AcceptsMultipleArgs(t *testing.T) {
+	t.Parallel()
+	args := []string{"testdata/one_line.txt", "testdata/two_lines.txt", "testdata/three_lines.txt"}
+	c, err := count.NewCounter(
+		count.WithInputFromArgs(args),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := 6
+	got := c.Lines()
+	if want != got {
+		t.Errorf("want %d, got %d", want, got)
+	}
+}
+
 func Test(t *testing.T) {
 	t.Parallel()
 	testscript.Run(t, testscript.Params{
