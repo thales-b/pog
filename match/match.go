@@ -31,3 +31,7 @@ func (m *Matcher) Match() {
 		lineNumber++
 	}
 }
+
+func Main() {
+	NewMatcher().Match()
+}
