@@ -9,7 +9,8 @@ import (
 )
 
 type Counter struct {
-	inputs []io.Reader
+	files  []io.Reader
+	input  io.Reader
 	output io.Writer
 }
 
@@ -17,7 +18,7 @@ type option func(*Counter) error
 
 func NewCounter(opts ...option) (*Counter, error) {
 	c := &Counter{
-		inputs: []io.Reader{os.Stdin},
+		input:  os.Stdin,
 		output: os.Stdout,
 	}
 	for _, opt := range opts {
@@ -31,11 +32,12 @@ func NewCounter(opts ...option) (*Counter, error) {
 
 func (c Counter) Lines() int {
 	var result int
-	for _, input := range c.inputs {
-		scanner := bufio.NewScanner(input)
-		for scanner.Scan() {
-			result++
-		}
+	scanner := bufio.NewScanner(c.input)
+	for scanner.Scan() {
+		result++
+	}
+	for _, f := range c.files {
+		f.(io.Closer).Close()
 	}
 	return result
 }
@@ -45,7 +47,7 @@ func WithInput(input io.Reader) option {
 		if input == nil {
 			return errors.New("nil input reader")
 		}
-		c.inputs = append(c.inputs, input)
+		c.input = input
 		return nil
 	}
 }
@@ -55,13 +57,15 @@ func WithInputFromArgs(args []string) option {
 		if len(args) < 1 {
 			return nil
 		}
-		for _, arg := range args {
-			f, err := os.Open(arg)
+		c.files = make([]io.Reader, len(args))
+		for i, path := range args {
+			f, err := os.Open(path)
 			if err != nil {
 				return err
 			}
-			c.inputs = append(c.inputs, f)
+			c.files[i] = f
 		}
+		c.input = io.MultiReader(c.files...)
 		return nil
 	}
 }
