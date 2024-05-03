@@ -1,4 +1,4 @@
-package counter
+package count
 
 import (
 	"bufio"
@@ -29,7 +29,7 @@ func NewCounter(opts ...option) (*Counter, error) {
 	return c, nil
 }
 
-func (c Counter) Count() int {
+func (c Counter) Lines() int {
 	var result int
 	input := bufio.NewScanner(c.input)
 	for input.Scan() {
@@ -63,5 +63,5 @@ func Main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(c.Count())
+	fmt.Println(c.Lines())
 }
