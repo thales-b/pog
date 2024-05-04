@@ -1,0 +1,2 @@
+this inthis input
+contains two lines

@@ -1,0 +1,7 @@
+exec count -bytes input.txt
+stdout '^29\n$'
+
+-- input.txt --
+this input
+contains
+29 bytes

@@ -1,0 +1,8 @@
+stdin input.txt
+exec count -lines input.txt 
+stdout '^3\n$'
+
+-- input.txt --
+this input
+contains
+three lines
