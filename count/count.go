@@ -139,7 +139,7 @@ func Main() int {
 		WithInputFromArgs(flag.Args()),
 	)
 	flag.Usage = func() {
-		fmt.Printf("Usage: %s [-lines] [bytes] [files...]\n", os.Args[0])
+		fmt.Printf("Usage: %s [-lines] [-bytes] [files...]\n", os.Args[0])
 		fmt.Println("Counts words (or lines/bytes) from stdin (or files).")
 		fmt.Println("Flags:")
 		flag.PrintDefaults()
