@@ -9,7 +9,8 @@ import (
 )
 
 func GetTimeOutput(args ...string) (string, error) {
-	cmd := exec.Command("time", args...)
+	cmdArgs := append([]string{"-p"}, args...)
+	cmd := exec.Command("/usr/bin/time", cmdArgs...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("error executing command: %v", err)
@@ -18,7 +19,7 @@ func GetTimeOutput(args ...string) (string, error) {
 	return string(output), nil
 }
 
-var timeOutput = regexp.MustCompile(`(\d+\.\d+) total`)
+var timeOutput = regexp.MustCompile(`real (\d+\.\d+)`)
 
 func ParseTimeOutput(text string) (float64, error) {
 	matches := timeOutput.FindStringSubmatch(text)
@@ -34,7 +35,7 @@ func ParseTimeOutput(text string) (float64, error) {
 
 func Main() int {
 	if len(os.Args) < 2 {
-		fmt.Printf("Usage: %s <command> [args...]\n", os.Args[0])
+		fmt.Printf("Usage: %s COMMAND [args...]\n", os.Args[0])
 		return 1
 	}
 	out, err := GetTimeOutput(os.Args[1:]...)
@@ -47,6 +48,6 @@ func Main() int {
 		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
-	fmt.Printf("(time: %f)\n", parsed)
+	fmt.Printf("(time: %fs)\n", parsed)
 	return 0
 }

@@ -7,8 +7,11 @@ import (
 
 func TestParseTimeOutput(t *testing.T) {
 	t.Parallel()
-	want := 1.009
-	input := "sleep 1  0.00s user 0.00s system 0% cpu 1.009 total"
+	want := 1.00
+	input := `/usr/bin/time -p sleep 1 
+		real 1.00 
+		user 0.00 
+		sys 0.00`
 	got, err := howlong.ParseTimeOutput(input)
 	if err != nil {
 		t.Fatal(err)
