@@ -6,12 +6,15 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
 type Conditions struct {
 	Summary     string
 	Temperature Temperature
+	City        string
+	Country     string
 }
 
 type OWMResponse struct {
@@ -20,6 +23,10 @@ type OWMResponse struct {
 	}
 	Main struct {
 		Temp Temperature
+	}
+	Name string
+	Sys  struct {
+		Country string
 	}
 }
 
@@ -70,6 +77,8 @@ func ParseResponse(data []byte) (Conditions, error) {
 	conditions := Conditions{
 		Summary:     resp.Weather[0].Main,
 		Temperature: resp.Main.Temp,
+		City:        resp.Name,
+		Country:     resp.Sys.Country,
 	}
 	return conditions, nil
 }
@@ -78,8 +87,7 @@ func (c Client) FormatURL(location string) string {
 	return fmt.Sprintf("%s/data/2.5/weather?q=%s&appid=%s", c.BaseURL, location, c.APIKey)
 }
 
-func (c *Client) GetWeather(location string) (Conditions,
-	error) {
+func (c *Client) GetWeather(location string) (Conditions, error) {
 	URL := c.FormatURL(location)
 	resp, err := c.HTTPClient.Get(URL)
 	if err != nil {
@@ -110,13 +118,13 @@ func Main() int {
 		fmt.Fprintln(os.Stderr, "Please set the environment variable OPENWEATHERMAP_API_KEY.")
 		return 1
 	}
-	location := os.Args[1]
+	location := strings.Join(os.Args[1:], " ")
 	conditions, err := Get(location, key)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
-	fmt.Printf("%s %.1fºC\n", conditions.Summary,
-		conditions.Temperature.Celsius())
+	fmt.Printf("Weather for %s, %s: ", conditions.City, conditions.Country)
+	fmt.Printf("%s %.1fºC\n", conditions.Summary, conditions.Temperature.Celsius())
 	return 0
 }
